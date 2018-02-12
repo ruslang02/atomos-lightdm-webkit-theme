@@ -1,0 +1,173 @@
+<html>
+<head>
+	<link href="bootstrap.min.css" rel="stylesheet">
+	<style type="text/css">
+		body {
+			background-image: url('bg.jpg');
+			background-size: cover;
+			height: 100%;
+			font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+		}
+
+		td {
+			font-size: 20px;
+			color: white;
+			vertical-align: middle;
+		}
+
+		div.card {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			margin: auto;
+			width: 30%;
+			min-width: 350px;
+			height: 185px;
+			display: inline-block;
+		}
+
+	</style>
+	<script type="text/javascript">
+
+		password_prompt = false;
+		selected_user = null;
+		time_remaining = 0
+
+		function show_prompt(text) {
+			password_prompt = true;
+
+			label = document.getElementById('password_prompt');
+			label.innerHTML = text;
+
+			user_table = document.getElementById('user_table');
+			for (i in user_table.rows) {
+				row = user_table.rows[i];
+				if (row.id !== ('user_' + selected_user) && row.style != null) // FIXME: Don't know why there are rows with styles
+					row.style.opacity = 0.25;
+			}
+
+			entry = document.getElementById('password_entry');
+			entry.value = '';
+
+			table = document.getElementById('password_table');
+			table.style.visibility = "visible";
+
+			entry.focus();
+		}
+
+		function show_message(text) {
+			table = document.getElementById('message_table');
+			label = document.getElementById('message_label');
+			label.innerHTML = text;
+			if (text.length > 0)
+				table.style.visibility = "visible";
+			else
+				table.style.visibility = "hidden";
+		}
+
+		function show_error(text) {
+			show_message(text);
+		}
+
+		function reset() {
+			user_table = document.getElementById('user_table');
+			for (i in user_table.rows) {
+				row = user_table.rows[i];
+				if (row.style != null) // FIXME: Don't know why there are rows with styles
+					row.style.opacity = 1;
+			}
+			table = document.getElementById('password_table');
+			table.style.visibility = "hidden";
+			password_prompt = false;
+		}
+
+		loading_text = '';
+
+		function throbber() {
+			loading_text += '.';
+			if (loading_text === '....')
+				loading_text = '.';
+			label = document.getElementById('countdown_label');
+			label.innerHTML = loading_text;
+			setTimeout('throbber()', 1000);
+		}
+
+		function authentication_complete() {
+			if (lightdm.is_authenticated)
+				lightdm.login(lightdm.authentication_user, lightdm.default_session);
+			else
+				show_message("Authentication Failed");
+
+			reset();
+			setTimeout('throbber()', 1000);
+		}
+
+		function timed_login(user) {
+			lightdm.login(lightdm.timed_login_user);
+			setTimeout('throbber()', 1000);
+		}
+
+		function start_authentication(username) {
+			lightdm.cancel_timed_login();
+			label = document.getElementById('countdown_label');
+			document.body.style.backgroundImage = "url(/home/" + username + "/.config/wallpaper.jpg), url(bg.jpg)";
+			if (label != null)
+				label.style.visibility = "hidden";
+			show_message("");
+			if (!password_prompt) {
+				selected_user = username;
+				lightdm.start_authentication(username);
+			}
+		}
+
+		function provide_secret() {
+			entry = document.getElementById('password_entry');
+			lightdm.provide_secret(entry.value);
+		}
+
+		function countdown() {
+			label = document.getElementById('countdown_label');
+			label.innerHTML = ' in ' + time_remaining + ' seconds';
+			time_remaining--;
+			if (time_remaining >= 0)
+				setTimeout('countdown()', 1000);
+		}
+
+		document.write('<div id="user_table" class="card p-3" style="z-index:100; margin: auto;">');
+		for (i in lightdm.users) {
+			user = lightdm.users[i];
+			image = 'file:///atomos/icons/User.png';
+
+			document.write('<user id="user_' + user.name + '" onclick="start_authentication(\'' + user.name + '\')" style="cursor: pointer;">');
+			document.write('<img width="48px" height="48px" src="' + image + '" />');
+			document.write('<b>' + user.display_name + '</b>');
+			if (user.name === lightdm.timed_login_user && lightdm.timed_login_delay > 0)
+				document.write('<div id="countdown_label"></div>');
+			document.write('</user>');
+		}
+		document.write('<div id="message_table" class="mt-2" style="visibility: hidden;"><b id="message_label"></b></div>');
+		document.write('<div id="password_table" style="margin: auto; visibility: hidden;">');
+		document.write('<div id="password_prompt"></div>');
+		document.write('<form action="javascript: provide_secret()"><input id="password_entry" class="form-control" type="password" /> <div class="text-right mt-2"><button type="submit" class="btn btn-primary">Login</button></div></form>');
+		document.write('</div>');
+		document.write('</div>');
+
+		time_remaining = lightdm.timed_login_delay;
+		if (time_remaining > 0)
+			countdown();
+		setInterval(function () {
+			document.getElementById("clock").innerText = new Date().toLocaleTimeString().substring(0, 11);
+		}, 1000);
+	</script>
+</head>
+
+<body>
+<button class="btn btn-danger material-icons p-2" style="position:fixed;top:0;right:0;margin:1rem;font-size:24px">
+	eject
+</button>
+<h1 id="clock" style="position:fixed; bottom:5vh; left:5vw; z-index:0;color:white; opacity: 0.3; font-size:10em"></h1>
+</body>
+
+</html>
