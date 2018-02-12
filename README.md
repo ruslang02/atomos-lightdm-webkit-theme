@@ -1,4 +1,4 @@
-#lightdm-webkit AtomOS theme
+# lightdm-webkit AtomOS theme
 
 AtomOS-styled `lightdm-webkit` theme. Uses Bootstrap 4.0.0.
 
