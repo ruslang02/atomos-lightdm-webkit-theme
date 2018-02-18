@@ -1,173 +1,195 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-	<link href="bootstrap.min.css" rel="stylesheet">
-	<style type="text/css">
-		body {
-			background-image: url('bg.jpg');
-			background-size: cover;
-			height: 100%;
-			font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-		}
-
-		td {
-			font-size: 20px;
-			color: white;
-			vertical-align: middle;
-		}
-
-		div.card {
-			position: fixed;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			margin: auto;
-			width: 30%;
-			min-width: 350px;
-			height: 185px;
-			display: inline-block;
-		}
-
-	</style>
-	<script type="text/javascript">
-
-		password_prompt = false;
-		selected_user = null;
-		time_remaining = 0
-
-		function show_prompt(text) {
-			password_prompt = true;
-
-			label = document.getElementById('password_prompt');
-			label.innerHTML = text;
-
-			user_table = document.getElementById('user_table');
-			for (i in user_table.rows) {
-				row = user_table.rows[i];
-				if (row.id !== ('user_' + selected_user) && row.style != null) // FIXME: Don't know why there are rows with styles
-					row.style.opacity = 0.25;
-			}
-
-			entry = document.getElementById('password_entry');
-			entry.value = '';
-
-			table = document.getElementById('password_table');
-			table.style.visibility = "visible";
-
-			entry.focus();
-		}
-
-		function show_message(text) {
-			table = document.getElementById('message_table');
-			label = document.getElementById('message_label');
-			label.innerHTML = text;
-			if (text.length > 0)
-				table.style.visibility = "visible";
-			else
-				table.style.visibility = "hidden";
-		}
-
-		function show_error(text) {
-			show_message(text);
-		}
-
-		function reset() {
-			user_table = document.getElementById('user_table');
-			for (i in user_table.rows) {
-				row = user_table.rows[i];
-				if (row.style != null) // FIXME: Don't know why there are rows with styles
-					row.style.opacity = 1;
-			}
-			table = document.getElementById('password_table');
-			table.style.visibility = "hidden";
-			password_prompt = false;
-		}
-
-		loading_text = '';
-
-		function throbber() {
-			loading_text += '.';
-			if (loading_text === '....')
-				loading_text = '.';
-			label = document.getElementById('countdown_label');
-			label.innerHTML = loading_text;
-			setTimeout('throbber()', 1000);
-		}
-
-		function authentication_complete() {
-			if (lightdm.is_authenticated)
-				lightdm.login(lightdm.authentication_user, lightdm.default_session);
-			else
-				show_message("Authentication Failed");
-
-			reset();
-			setTimeout('throbber()', 1000);
-		}
-
-		function timed_login(user) {
-			lightdm.login(lightdm.timed_login_user);
-			setTimeout('throbber()', 1000);
-		}
-
-		function start_authentication(username) {
-			lightdm.cancel_timed_login();
-			label = document.getElementById('countdown_label');
-			document.body.style.backgroundImage = "url(/home/" + username + "/.config/wallpaper.jpg), url(bg.jpg)";
-			if (label != null)
-				label.style.visibility = "hidden";
-			show_message("");
-			if (!password_prompt) {
-				selected_user = username;
-				lightdm.start_authentication(username);
-			}
-		}
-
-		function provide_secret() {
-			entry = document.getElementById('password_entry');
-			lightdm.provide_secret(entry.value);
-		}
-
-		function countdown() {
-			label = document.getElementById('countdown_label');
-			label.innerHTML = ' in ' + time_remaining + ' seconds';
-			time_remaining--;
-			if (time_remaining >= 0)
-				setTimeout('countdown()', 1000);
-		}
-
-		document.write('<div id="user_table" class="card p-3" style="z-index:100; margin: auto;">');
-		for (i in lightdm.users) {
-			user = lightdm.users[i];
-			image = 'file:///atomos/icons/User.png';
-
-			document.write('<user id="user_' + user.name + '" onclick="start_authentication(\'' + user.name + '\')" style="cursor: pointer;">');
-			document.write('<img width="48px" height="48px" src="' + image + '" />');
-			document.write('<b>' + user.display_name + '</b>');
-			if (user.name === lightdm.timed_login_user && lightdm.timed_login_delay > 0)
-				document.write('<div id="countdown_label"></div>');
-			document.write('</user>');
-		}
-		document.write('<div id="message_table" class="mt-2" style="visibility: hidden;"><b id="message_label"></b></div>');
-		document.write('<div id="password_table" style="margin: auto; visibility: hidden;">');
-		document.write('<div id="password_prompt"></div>');
-		document.write('<form action="javascript: provide_secret()"><input id="password_entry" class="form-control" type="password" /> <div class="text-right mt-2"><button type="submit" class="btn btn-primary">Login</button></div></form>');
-		document.write('</div>');
-		document.write('</div>');
-
-		time_remaining = lightdm.timed_login_delay;
-		if (time_remaining > 0)
-			countdown();
-		setInterval(function () {
-			document.getElementById("clock").innerText = new Date().toLocaleTimeString().substring(0, 11);
-		}, 1000);
-	</script>
+	<meta charset="UTF-8">
+	<title>LightDM theme demo</title>
+	<link href="dist/bootstrap.min.css" rel="stylesheet">
+	<link href="dist/material-design-icons.css" rel="stylesheet">
 </head>
-
 <body>
-<button class="btn btn-danger material-icons p-2" style="position:fixed;top:0;right:0;margin:1rem;font-size:24px">
-	eject
-</button>
-<h1 id="clock" style="position:fixed; bottom:5vh; left:5vw; z-index:0;color:white; opacity: 0.3; font-size:10em"></h1>
-</body>
 
+<section id="scene">
+	<footer class="text-white">
+		<h1 id="clock" class="display-1 m-0">9:00 PM</h1>
+		<h2 id="date">Tuesday, 23 February</h2>
+	</footer>
+</section>
+
+<section id="login">
+	<main class="card text-left text-truncate">
+		<div class="card-body" id="users"></div>
+		<footer class="bg-light p-2 text-right border border-left-0 border-bottom-0 border-right-0">
+			<div class="btn-group btn-group-sm dropdown dropup d-none">
+				<button class="btn btn-sm dropdown-toggle" data-toggle="dropdown" id="sessionMenu" aria-haspopup="true" aria-expanded="false" type="button"><i class="material-icons align-middle mr-1" style="font-size:18px;">&#xE30C;</i><span class="align-middle">Session</span></button>
+				<div class="dropdown-menu" style="bottom:2rem;right:0;left:auto;top:auto;" aria-labelledby="sessionMenu"></div>
+			</div>
+			<div class="btn-group btn-group-sm dropdown dropup">
+				<a href="javascript: lightdm.shutdown()" class="btn btn-danger"><i class="material-icons align-middle mr-1" style="font-size:18px;">&#xE8AC;</i><span class="align-middle">Shut Down</span></a>
+				<button class="btn btn-danger dropdown-toggle dropdown-toggle-split" style="margin: -3px; margin-left: -4px;line-height: 1.3;" data-toggle="dropdown" id="shutdownMenu" aria-haspopup="true" aria-expanded="false" type="button"></button>
+				<div class="dropdown-menu" style="bottom:2rem;right:0;left:auto;top:auto;" aria-labelledby="shutdownMenu">
+					<a class="dropdown-item" href="javascript: lightdm.restart()"><i class="material-icons align-middle mr-1">update</i><span class="align-middle">Restart</span></a>
+					<a class="dropdown-item" href="javascript: lightdm.suspend()"><i class="material-icons align-middle mr-1">&#xE549;</i><span class="align-middle">Sleep</span></a>
+					<a class="dropdown-item" href="javascript: lightdm.hibernate()"><i class="material-icons align-middle mr-1">flare</i><span class="align-middle">Hibernate</span></a>
+				</div>
+			</div>
+		</footer>
+	</main>
+</section>
+
+<script>
+	init();
+function init() {
+	lightdm.users.forEach(function(user) {
+		document.getElementById("users").innerHTML += '<a href="javascript: startAuth(\'' + user.name + '\')" class="media mb-2 text-dark">' +
+			'  <img class="mr-3" src="./User.png">' +
+			'  <h5 class="media-body m-0">' +
+			user.display_name +
+			'  </h5>\n' +
+			'</a>'
+	})
+}
+
+function startAuth(uname) {
+	var popover = document.querySelector("form.popover");
+	if(popover)
+		document.querySelector("#users").removeChild(popover);
+	/*var otherUsers = document.querySelectorAll("a.media:not(:focus)");
+	console.log(otherUsers);
+	if(otherUsers)
+		otherUsers.forEach(function(item) {
+			console.log(item.innerText);
+			item.getNamedItem("class").value = item.getNamedItem("class").value.replace(/ other/g, "") + " other";
+		});*/
+	var uelement = document.querySelector("a.media:hover");
+	var form = document.createElement("form");
+	document.body.style.backgroundImage = "url(/home/" + uname + "/.config/wallpaper.jpg), url(bg.jpg)";
+	console.log(uelement.innerText, uelement.getAttribute("class"), uelement.attributes.getNamedItem("class").value);
+	uelement.setAttribute("class", uelement.getAttribute("class").replace(/ other/g, ""));
+	form.innerHTML = "<div class='arrow' style='top:-8px;left:5px;'></div><div class='popover-body'><input type='password' name='userpass' class='form-control form-control-sm'>" +
+		"<button class='btn btn-primary mt-1' type='submit'><i class='material-icons mr-1 align-middle'>&#xE898;</i><span class='align-middle'>Enter</span></button></div>";
+	form.setAttribute("class", "popover position-relative w-100 mb-3");
+	form.setAttribute("action", "javascript: providePassword()");
+	uelement.parentNode.insertBefore(form, uelement.nextSibling);
+
+	lightdm.cancel_timed_login();
+	lightdm.start_authentication(uname);
+}
+function providePassword() {
+	lightdm.provide_secret(document.querySelector(".popover input").value);
+}
+	function authentication_complete() {
+		if (lightdm.is_authenticated)
+			lightdm.login(lightdm.authentication_user, 'atomos');
+	}
+	setInterval(timeUpdate, 1000);
+	function timeUpdate() {
+			var monthNames = [
+				"January", "February", "March",
+				"April", "May", "June", "July",
+				"August", "September", "October",
+				"November", "December"
+			];
+			var weekNames = [
+				"Sunday", "Monday", "Tuesday",
+				"Wednesday", "Thursday", "Friday", "Saturday"
+			];
+			var time = new Date();
+			document.querySelector("#clock").innerText = formatAMPM(time);
+			document.querySelector("#date").innerText = weekNames[time.getDay()] + ", " + time.getDate() + " " + monthNames[time.getMonth()];
+	}
+	timeUpdate();
+	function formatAMPM(date) {
+		var hours = date.getHours();
+		var minutes = date.getMinutes();
+		var ampm = hours >= 12 ? 'PM' : 'AM';
+		hours = hours % 12;
+		hours = hours ? hours : 12; // the hour '0' should be '12'
+		minutes = minutes < 10 ? '0'+minutes : minutes;
+		var strTime = hours + ':' + minutes + ' ' + ampm;
+		return strTime;
+	}
+</script>
+<style>
+	body {
+		background: url('bg.jpg') center no-repeat;
+		background-size: cover;
+		height:100%;
+		display:inline-block;
+		width:100%;
+		font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+		transition: background-image .5s ease;
+	}
+	html {
+		height:100%;
+	}
+	.media.other {
+		opacity:0.6;
+		transition: opacity .2s ease;
+	}
+	.media:hover {
+		opacity: 1;
+	}
+	.popover {max-width: unset; z-index:0 !important;}
+	.popover .arrow::before {
+		border-bottom: 5px #cdcdcd solid;
+		width:8px;
+	}
+	.popover .arrow::after {
+		margin: 1px 0 0 1px;
+		border-bottom: 4px solid white;
+	}
+	section {
+		position:fixed;
+		top:0;
+		left:0;
+		width:100%;
+		height:100%;
+	}
+	section#scene footer {
+		font-weight:100;
+		position:absolute;
+		bottom:5%;
+		left:5%;
+	}
+	section#login {
+		position: relative;
+		text-align: center;
+		display: block;
+		height: 100%;
+	}
+	section#login main {
+		display: inline-block;
+		vertical-align: middle;
+		min-width:350px;
+		box-shadow:0 0 10px black;
+	}
+	section#login main .media .media-body {
+		line-height:32px;
+	}
+	section#login main .media img {
+		height:32px;
+	}
+
+	section#login::before {
+		content: '';
+		width: 0;
+		height: 100%;
+		display: inline-block;
+		vertical-align: middle;
+	}
+	.dropdown-toggle::after {
+		vertical-align:middle !important;
+	}
+
+	section#login main .card-body {
+		height: calc(100% - 44px);
+		min-height: 200px;
+	}
+	.material-icons {font-size:18px}
+	section#login .btn {
+		line-height:1;
+	}
+</style>
+<script src="dist/bootstrap-native-v4.min.js"></script>
+</body>
 </html>
